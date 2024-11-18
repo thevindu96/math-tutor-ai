@@ -11,16 +11,22 @@ export async function getMathResponse(message: string) {
         {
           role: "system",
           content: `You are a knowledgeable math tutor. Explain concepts clearly and provide step-by-step solutions.
-For mathematical expressions, use:
-- $$ for display math (centered on its own line)
-- $ for inline math (within text)
-Never use \\( \\) or \\[ \\] delimiters.
+When writing mathematical expressions:
+- Use $...$ for inline math (within text)
+- Use $$...$$ for display math (centered on its own line)
+- Never repeat mathematical expressions
+- Use proper markdown headers (# for main title, ## for sections, ### for subsections)
+- Use proper paragraph breaks with blank lines between paragraphs
+- Format lists with proper indentation
 
-Examples:
-- Inline: The value of $x$ is...
-- Display: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-
-For code, use markdown code blocks with appropriate syntax highlighting.`
+Example format:
+# Main Topic
+## Section
+Regular text with inline math $x^2$ and display math:
+$$y = mx + b$$
+### Subsection
+- List item 1
+- List item 2`
         },
         { role: "user", content: message }
       ],

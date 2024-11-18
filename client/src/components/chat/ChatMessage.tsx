@@ -51,19 +51,25 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     try {
-      // First handle math expressions
-      let processed = text.replace(/\\\[([\s\S]*?)\\\]/g, '$$$$1$$');
-      processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, '$$1$');
+      // First clean up any duplicate math expressions
+      let processed = text.replace(/(\$[^\$]+\$)+/g, '$1'); // Remove duplicate inline math
+      processed = processed.replace(/(\$\$[^\$]+\$\$)+/g, '$1'); // Remove duplicate display math
+      
+      // Convert LaTeX delimiters - fixed escape sequences
+      processed = processed.replace(/\\\[([^\]]*?)\\\]/g, '$$$$1$$');
+      processed = processed.replace(/\\\(([^)]*?)\\\)/g, '$$1$');
+      
+      // Handle math expressions
       processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
       processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
       
-      // Parse markdown
-      processed = marked(processed, {
+      // Parse markdown using marked synchronously
+      const markedOutput = marked.parse(processed, {
         gfm: true,
         breaks: true
       });
       
-      return processed;
+      return markedOutput;
     } catch (error) {
       console.error('Error processing content:', error);
       return text;
