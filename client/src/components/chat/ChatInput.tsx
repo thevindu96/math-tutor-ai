@@ -54,7 +54,7 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
       {isLoading && (
         <div className="text-sm text-muted-foreground flex items-center gap-2">
           <Loader2 className="h-3 w-3 animate-spin" />
-          <span>Thinking with OpenAI-01...</span>
+          <span>Thinking with GPT-4...</span>
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function getMathResponse(message: string) {
   try {
     const response = await openai.chat.completions.create({
-      model: "openai-01-preview",
+      model: "gpt-4-1106-preview",
       messages: [
         {
           role: "system",
