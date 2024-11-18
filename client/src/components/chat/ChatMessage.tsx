@@ -16,14 +16,28 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   useEffect(() => {
     if (messageRef.current) {
-      // Process math expressions
-      const mathElements = messageRef.current.querySelectorAll(".math");
-      mathElements.forEach((elem) => {
+      // Process display math
+      const displayMathElements = messageRef.current.querySelectorAll(".math-display");
+      displayMathElements.forEach((elem) => {
         try {
           const tex = elem.textContent || "";
           katex.render(tex, elem as HTMLElement, {
             throwOnError: false,
             displayMode: true,
+          });
+        } catch (error) {
+          console.error("KaTeX rendering error:", error);
+        }
+      });
+
+      // Process inline math
+      const inlineMathElements = messageRef.current.querySelectorAll(".math-inline");
+      inlineMathElements.forEach((elem) => {
+        try {
+          const tex = elem.textContent || "";
+          katex.render(tex, elem as HTMLElement, {
+            throwOnError: false,
+            displayMode: false,
           });
         } catch (error) {
           console.error("KaTeX rendering error:", error);
@@ -40,10 +54,10 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     // Convert markdown-style math blocks to HTML
-    let processed = text.replace(/\$\$(.*?)\$\$/g, '<div class="math">$1</div>');
+    let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
     
     // Convert inline math
-    processed = processed.replace(/\$(.*?)\$/g, '<span class="math">$1</span>');
+    processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
     
     // Convert code blocks with language
     processed = processed.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
