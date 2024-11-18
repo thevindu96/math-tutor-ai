@@ -17,29 +17,33 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   useEffect(() => {
     if (messageRef.current) {
-      const renderMathElement = (elem: Element, displayMode: boolean) => {
+      // Process display math
+      const displayMath = messageRef.current.querySelectorAll('.math-display');
+      displayMath.forEach((elem) => {
         try {
-          const tex = elem.textContent || "";
-          katex.render(tex, elem as HTMLElement, {
+          katex.render(elem.textContent || '', elem as HTMLElement, {
+            displayMode: true,
             throwOnError: false,
-            displayMode,
             strict: false
           });
         } catch (error) {
-          console.error("KaTeX rendering error:", error);
-          elem.textContent = elem.textContent || "";
+          console.error('KaTeX error:', error);
         }
-      };
-
-      // Process display math
-      messageRef.current.querySelectorAll(".math-display").forEach(elem => 
-        renderMathElement(elem, true)
-      );
+      });
 
       // Process inline math
-      messageRef.current.querySelectorAll(".math-inline").forEach(elem => 
-        renderMathElement(elem, false)
-      );
+      const inlineMath = messageRef.current.querySelectorAll('.math-inline');
+      inlineMath.forEach((elem) => {
+        try {
+          katex.render(elem.textContent || '', elem as HTMLElement, {
+            displayMode: false,
+            throwOnError: false,
+            strict: false
+          });
+        } catch (error) {
+          console.error('KaTeX error:', error);
+        }
+      });
 
       // Process code blocks
       messageRef.current.querySelectorAll("pre code").forEach(block => {
@@ -49,62 +53,15 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
   }, [content]);
 
   const processContent = (text: string) => {
-    try {
-      // Create a temporary div to help with processing
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = marked.parse(text);
-
-      // Process all text nodes to find and convert math delimiters
-      const processNode = (node: Node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const content = node.textContent || '';
-          const fragment = document.createDocumentFragment();
-          let lastIndex = 0;
-          
-          // Function to create math element
-          const createMathElement = (tex: string, isDisplay: boolean) => {
-            const mathElem = document.createElement(isDisplay ? 'div' : 'span');
-            mathElem.className = isDisplay ? 'math-display' : 'math-inline';
-            mathElem.textContent = tex;
-            return mathElem;
-          };
-
-          // Find all math expressions
-          const mathRegex = /(\$\$[^\$]+\$\$|\$[^\$]+\$)/g;
-          let match;
-          
-          while ((match = mathRegex.exec(content)) !== null) {
-            // Add text before math
-            if (match.index > lastIndex) {
-              fragment.appendChild(document.createTextNode(content.slice(lastIndex, match.index)));
-            }
-            
-            // Process math expression
-            const isDisplay = match[0].startsWith('$$');
-            const tex = match[0].slice(isDisplay ? 2 : 1, -(isDisplay ? 2 : 1));
-            fragment.appendChild(createMathElement(tex, isDisplay));
-            
-            lastIndex = match.index + match[0].length;
-          }
-          
-          // Add remaining text
-          if (lastIndex < content.length) {
-            fragment.appendChild(document.createTextNode(content.slice(lastIndex)));
-          }
-          
-          node.parentNode?.replaceChild(fragment, node);
-        } else {
-          // Recursively process child nodes
-          Array.from(node.childNodes).forEach(processNode);
-        }
-      };
-
-      processNode(tempDiv);
-      return tempDiv.innerHTML;
-    } catch (error) {
-      console.error('Error processing content:', error);
-      return text;
-    }
+    // First convert any LaTeX delimiters to standardized format
+    let processed = text.replace(/\\[(.*?)\\]/g, '$$$$1$$');
+    processed = processed.replace(/\\((.*?)\\)/g, '$$1$');
+    
+    // Then parse with marked
+    return marked.parse(processed, {
+      gfm: true,
+      breaks: true
+    });
   };
 
   return (
