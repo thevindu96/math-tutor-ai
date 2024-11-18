@@ -52,10 +52,24 @@
   text-align: center;
   overflow-x: auto;
   max-width: 100%;
+  padding: 0.5em 0;
 }
 
 .math-inline {
   display: inline-block;
   margin: 0 0.1em;
   vertical-align: middle;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+.katex {
+  text-rendering: auto;
+  font: normal 1.1em KaTeX_Main, Times New Roman, serif;
+  line-height: 1.2;
+  text-indent: 0;
 }
