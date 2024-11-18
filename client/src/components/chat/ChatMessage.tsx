@@ -23,11 +23,10 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
           katex.render(tex, elem as HTMLElement, {
             throwOnError: false,
             displayMode,
-            strict: false // Add this to be more forgiving with the input
+            strict: false
           });
         } catch (error) {
           console.error("KaTeX rendering error:", error);
-          // Keep the original text visible if rendering fails
           elem.textContent = elem.textContent || "";
         }
       };
@@ -51,25 +50,23 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     try {
-      // First clean up any duplicate math expressions
-      let processed = text.replace(/(\$[^\$]+\$)+/g, '$1'); // Remove duplicate inline math
-      processed = processed.replace(/(\$\$[^\$]+\$\$)+/g, '$1'); // Remove duplicate display math
+      // Remove duplicate expressions first using non-greedy matching
+      let processed = text.replace(/(\$[^\$]+\$)()+/g, '$1');
+      processed = processed.replace(/(\$\$[^\$]+\$\$)()+/g, '$1');
       
-      // Convert LaTeX delimiters - fixed escape sequences
-      processed = processed.replace(/\\\[([^\]]*?)\\\]/g, '$$$$1$$');
-      processed = processed.replace(/\\\(([^)]*?)\\\)/g, '$$1$');
+      // Handle LaTeX delimiters with proper escaping
+      processed = processed.replace(/\\\[(.*?)\\\]/g, '$$$$1$$');
+      processed = processed.replace(/\\\((.*?)\\\)/g, '$$1$');
       
-      // Handle math expressions
-      processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
-      processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
+      // Process math expressions with non-greedy matching
+      processed = processed.replace(/\$\$([^$]*?)\$\$/g, '<div class="math-display">$1</div>');
+      processed = processed.replace(/\$([^$]*?)\$/g, '<span class="math-inline">$1</span>');
       
-      // Parse markdown using marked synchronously
-      const markedOutput = marked.parse(processed, {
+      // Parse markdown
+      return marked.parse(processed, {
         gfm: true,
         breaks: true
       });
-      
-      return markedOutput;
     } catch (error) {
       console.error('Error processing content:', error);
       return text;
