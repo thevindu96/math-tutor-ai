@@ -5,7 +5,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function getMathResponse(message: string) {
   try {
     const response = await openai.completions.create({
-      model: "o1-preview",
+      model: "gpt-4o",
       prompt: `You are a knowledgeable math tutor. Follow these formatting rules strictly:
 1. For inline math, use ONLY single $ delimiters: $x^2$
 2. For display math, use ONLY double $$ delimiters: $$y = mx + b$$
