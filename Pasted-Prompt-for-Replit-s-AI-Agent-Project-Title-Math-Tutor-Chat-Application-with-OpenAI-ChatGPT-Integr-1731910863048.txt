@@ -1,0 +1,94 @@
+Prompt for Replit's AI Agent:
+
+Project Title: Math Tutor Chat Application with OpenAI ChatGPT Integration
+
+Application Purpose:
+
+Develop a responsive web application that allows users to engage in real-time conversations with an AI math tutor. The application should mimic ChatGPT's user experience and be accessible via both phone browsers and desktop browsers. It will serve as a one-on-one math tutoring platform capable of displaying mathematical notation, equations, plain text code blocks, tables, and other educational content relevant to learning complex mathematics.
+
+Desired Features:
+
+User-Friendly Chat Interface:
+
+Create an intuitive chat interface where users can input text and receive AI-generated responses.
+Mimic the UX of ChatGPT for familiarity and ease of use.
+Include conversation history, allowing users to review past interactions.
+Mathematical Notation and Equations Support:
+
+Implement rendering of mathematical expressions using LaTeX syntax.
+Use libraries like MathJax or KaTeX to display equations accurately.
+Code Blocks with Syntax Highlighting:
+
+Enable the display of plain text code blocks within conversations.
+Use Highlight.js or similar libraries for syntax highlighting of code snippets.
+Tables and Structured Data:
+
+Allow the AI to present tables and structured data within the chat.
+Ensure tables are responsive and display correctly on all devices.
+Responsive Design:
+
+Design the UI to be fully responsive, functioning seamlessly on both mobile and desktop browsers.
+Utilize modern design principles for a clean and engaging aesthetic.
+Real-Time Conversations:
+
+Implement real-time messaging without the need to refresh the page.
+Use technologies like WebSockets or long polling to achieve real-time interaction.
+Technology Preferences:
+
+Frontend:
+
+Develop using React.js for building a dynamic and responsive user interface.
+Utilize CSS frameworks like Tailwind CSS or Bootstrap for styling and responsiveness.
+Backend:
+
+Use Node.js with Express.js for the server-side application.
+No database is required unless necessary for extended functionality.
+API Integration Details:
+
+OpenAI ChatGPT API Integration:
+
+Integrate with OpenAI's ChatGPT API (GPT-4 or the latest available model) for AI-generated responses.
+Ensure the API key is securely stored using environment variables.
+Error Handling and Rate Limits:
+
+Implement graceful handling of API rate limits and errors.
+Provide informative feedback to users in case of API unavailability or errors.
+Design and User Experience Considerations:
+
+Modern Aesthetic:
+
+Design a clean, modern, and intuitive interface that is visually appealing.
+Emphasize ease of use and accessibility for all users.
+Device Compatibility:
+
+Ensure the application works flawlessly on various devices and screen sizes.
+Test on multiple browsers to guarantee compatibility.
+Performance and Security Expectations:
+
+Performance Optimization:
+
+Optimize the application for quick load times and minimal latency in chat responses.
+Use best practices in coding and resource management to enhance performance.
+Security Best Practices:
+
+Protect user data and prevent unauthorized access.
+Sanitize and validate all user inputs to prevent security vulnerabilities like XSS attacks.
+Securely handle API keys and sensitive information using environment variables.
+Additional Instructions:
+
+Content Rendering:
+
+Implement proper rendering for AI-generated content, including mathematical expressions, code blocks, and tables.
+Ensure that all special content types display correctly without user intervention.
+Session Management:
+
+If applicable, manage user sessions to maintain conversation context.
+Consider using session storage or tokens if persistent sessions are required.
+Testing and Validation:
+
+Thoroughly test the application to ensure all features work as intended.
+Validate the rendering of mathematical notation and code blocks on different devices and browsers.
+Documentation:
+
+Provide clear documentation of the codebase for future maintenance.
+Include instructions on how to set up and run the application locally.
