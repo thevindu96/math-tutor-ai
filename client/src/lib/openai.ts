@@ -4,12 +4,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function getMathResponse(message: string) {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-1106-preview",
-      messages: [
-        {
-          role: "system",
-          content: `You are a knowledgeable math tutor. Follow these formatting rules strictly:
+    const response = await openai.completions.create({
+      model: "o1-preview",
+      prompt: `You are a knowledgeable math tutor. Follow these formatting rules strictly:
 1. For inline math, use ONLY single $ delimiters: $x^2$
 2. For display math, use ONLY double $$ delimiters: $$y = mx + b$$
 3. Never use \\[ \\] or \\( \\) delimiters
@@ -21,19 +18,12 @@ export async function getMathResponse(message: string) {
    - Regular paragraphs separated by blank lines
    - * or - for bullet points
 
-Example:
-# Quadratic Formula
-The quadratic formula $ax^2 + bx + c = 0$ can be solved using:
-$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-`
-        },
-        { role: "user", content: message }
-      ],
+${message}`,
       temperature: 0.7,
       max_tokens: 1000,
     });
 
-    return response.choices[0].message.content;
+    return response.choices[0].text;
   } catch (error) {
     console.error("OpenAI API error:", error);
     throw new Error("Failed to get response from the tutor");
