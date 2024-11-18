@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+.prose {
+  max-width: 100%;
+  padding-right: 1rem;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.prose p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.math-display, .math-inline {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 0.5em 0;
+}
+
 .math-display {
   display: block;
   margin: 1em 0;

@@ -5,6 +5,7 @@ import "katex/dist/katex.min.css";
 import katex from "katex";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import { marked } from 'marked';
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -50,28 +51,22 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     try {
-      // First, convert any \[ \] to $$ $$
+      // First handle math expressions
       let processed = text.replace(/\\\[([\s\S]*?)\\\]/g, '$$$$1$$');
-      
-      // Convert \( \) to $ $
       processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, '$$1$');
-      
-      // Now handle standard delimiters
       processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
       processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
       
-      // Handle code blocks
-      processed = processed.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
-        `<pre><code class="${lang || ''}">${code.trim()}</code></pre>`
-      );
-      
-      // Convert single line code
-      processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Parse markdown
+      processed = marked(processed, {
+        gfm: true,
+        breaks: true
+      });
       
       return processed;
     } catch (error) {
       console.error('Error processing content:', error);
-      return text; // Return original text if processing fails
+      return text;
     }
   };
 
@@ -89,7 +84,11 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
       </div>
       <div 
         ref={messageRef}
-        className="flex-1 prose prose-sm dark:prose-invert max-w-none"
+        className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-hidden"
+        style={{
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word'
+        }}
         dangerouslySetInnerHTML={{ __html: processContent(content) }}
       />
     </div>
