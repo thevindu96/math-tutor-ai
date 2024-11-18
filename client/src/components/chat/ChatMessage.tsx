@@ -50,22 +50,34 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     try {
-      // Remove duplicate expressions first using non-greedy matching
-      let processed = text.replace(/(\$[^\$]+\$)()+/g, '$1');
-      processed = processed.replace(/(\$\$[^\$]+\$\$)()+/g, '$1');
+      // First normalize all LaTeX delimiters to $ and $$
+      let processed = text.replace(/\[(.*?)\]/g, '$$$$1$$');
+      processed = processed.replace(/\((.*?)\)/g, '$$1$');
       
-      // Handle LaTeX delimiters with proper escaping
-      processed = processed.replace(/\\\[(.*?)\\\]/g, '$$$$1$$');
-      processed = processed.replace(/\\\((.*?)\\\)/g, '$$1$');
+      // Clean up repeated expressions
+      const deduplicateExpressions = (text: string, delimiter: string) => {
+        // Create the pattern string first to avoid template literal issues
+        const patternStr = `(\\${delimiter}[^\\${delimiter}]+\\${delimiter})\\s*\\1+`;
+        const regex = new RegExp(patternStr, 'g');
+        return text.replace(regex, '$1');
+      };
+
+      // Apply deduplication for both inline and display math
+      processed = deduplicateExpressions(processed, '$');
+      processed = deduplicateExpressions(processed, '$$');
       
-      // Process math expressions with non-greedy matching
-      processed = processed.replace(/\$\$([^$]*?)\$\$/g, '<div class="math-display">$1</div>');
+      // Remove any zero-width spaces and other invisible characters that might cause duplication
+      processed = processed.replace(/[\u200B-\u200D\uFEFF]/g, '');
+      
+      // Convert to HTML elements for rendering
+      processed = processed.replace(/\$\$(.*?)\$\$/g, '<div class="math-display">$1</div>');
       processed = processed.replace(/\$([^$]*?)\$/g, '<span class="math-inline">$1</span>');
       
-      // Parse markdown
+      // Parse markdown with proper handling of math blocks
       return marked.parse(processed, {
         gfm: true,
-        breaks: true
+        breaks: true,
+        headerIds: true
       });
     } catch (error) {
       console.error('Error processing content:', error);
