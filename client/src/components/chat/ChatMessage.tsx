@@ -16,58 +16,63 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   useEffect(() => {
     if (messageRef.current) {
-      // Process display math
-      const displayMathElements = messageRef.current.querySelectorAll(".math-display");
-      displayMathElements.forEach((elem) => {
+      const renderMathElement = (elem: Element, displayMode: boolean) => {
         try {
           const tex = elem.textContent || "";
           katex.render(tex, elem as HTMLElement, {
             throwOnError: false,
-            displayMode: true,
+            displayMode,
+            strict: false // Add this to be more forgiving with the input
           });
         } catch (error) {
           console.error("KaTeX rendering error:", error);
+          // Keep the original text visible if rendering fails
+          elem.textContent = elem.textContent || "";
         }
-      });
+      };
+
+      // Process display math
+      messageRef.current.querySelectorAll(".math-display").forEach(elem => 
+        renderMathElement(elem, true)
+      );
 
       // Process inline math
-      const inlineMathElements = messageRef.current.querySelectorAll(".math-inline");
-      inlineMathElements.forEach((elem) => {
-        try {
-          const tex = elem.textContent || "";
-          katex.render(tex, elem as HTMLElement, {
-            throwOnError: false,
-            displayMode: false,
-          });
-        } catch (error) {
-          console.error("KaTeX rendering error:", error);
-        }
-      });
+      messageRef.current.querySelectorAll(".math-inline").forEach(elem => 
+        renderMathElement(elem, false)
+      );
 
       // Process code blocks
-      const codeBlocks = messageRef.current.querySelectorAll("pre code");
-      codeBlocks.forEach((block) => {
+      messageRef.current.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block as HTMLElement);
       });
     }
   }, [content]);
 
   const processContent = (text: string) => {
-    // Convert markdown-style math blocks to HTML
-    let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
-    
-    // Convert inline math
-    processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
-    
-    // Convert code blocks with language
-    processed = processed.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
-      `<pre><code class="${lang || ''}">${code.trim()}</code></pre>`
-    );
-    
-    // Convert single line code
-    processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
-    return processed;
+    try {
+      // First, convert any \[ \] to $$ $$
+      let processed = text.replace(/\\\[([\s\S]*?)\\\]/g, '$$$$1$$');
+      
+      // Convert \( \) to $ $
+      processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, '$$1$');
+      
+      // Now handle standard delimiters
+      processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-display">$1</div>');
+      processed = processed.replace(/\$([^\$]*?)\$/g, '<span class="math-inline">$1</span>');
+      
+      // Handle code blocks
+      processed = processed.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
+        `<pre><code class="${lang || ''}">${code.trim()}</code></pre>`
+      );
+      
+      // Convert single line code
+      processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      return processed;
+    } catch (error) {
+      console.error('Error processing content:', error);
+      return text; // Return original text if processing fails
+    }
   };
 
   return (

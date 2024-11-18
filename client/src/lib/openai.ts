@@ -11,8 +11,16 @@ export async function getMathResponse(message: string) {
         {
           role: "system",
           content: `You are a knowledgeable math tutor. Explain concepts clearly and provide step-by-step solutions.
-          Use LaTeX notation for mathematical expressions by wrapping them in $$ for display math or $ for inline math.
-          When showing code, use markdown code blocks with appropriate syntax highlighting.`
+For mathematical expressions, use:
+- $$ for display math (centered on its own line)
+- $ for inline math (within text)
+Never use \\( \\) or \\[ \\] delimiters.
+
+Examples:
+- Inline: The value of $x$ is...
+- Display: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+
+For code, use markdown code blocks with appropriate syntax highlighting.`
         },
         { role: "user", content: message }
       ],
