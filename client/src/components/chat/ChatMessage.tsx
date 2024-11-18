@@ -50,35 +50,57 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
   const processContent = (text: string) => {
     try {
-      // First normalize all LaTeX delimiters to $ and $$
-      let processed = text.replace(/\[(.*?)\]/g, '$$$$1$$');
-      processed = processed.replace(/\((.*?)\)/g, '$$1$');
-      
-      // Clean up repeated expressions
-      const deduplicateExpressions = (text: string, delimiter: string) => {
-        // Create the pattern string first to avoid template literal issues
-        const patternStr = `(\\${delimiter}[^\\${delimiter}]+\\${delimiter})\\s*\\1+`;
-        const regex = new RegExp(patternStr, 'g');
-        return text.replace(regex, '$1');
+      // Create a temporary div to help with processing
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = marked.parse(text);
+
+      // Process all text nodes to find and convert math delimiters
+      const processNode = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const content = node.textContent || '';
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+          
+          // Function to create math element
+          const createMathElement = (tex: string, isDisplay: boolean) => {
+            const mathElem = document.createElement(isDisplay ? 'div' : 'span');
+            mathElem.className = isDisplay ? 'math-display' : 'math-inline';
+            mathElem.textContent = tex;
+            return mathElem;
+          };
+
+          // Find all math expressions
+          const mathRegex = /(\$\$[^\$]+\$\$|\$[^\$]+\$)/g;
+          let match;
+          
+          while ((match = mathRegex.exec(content)) !== null) {
+            // Add text before math
+            if (match.index > lastIndex) {
+              fragment.appendChild(document.createTextNode(content.slice(lastIndex, match.index)));
+            }
+            
+            // Process math expression
+            const isDisplay = match[0].startsWith('$$');
+            const tex = match[0].slice(isDisplay ? 2 : 1, -(isDisplay ? 2 : 1));
+            fragment.appendChild(createMathElement(tex, isDisplay));
+            
+            lastIndex = match.index + match[0].length;
+          }
+          
+          // Add remaining text
+          if (lastIndex < content.length) {
+            fragment.appendChild(document.createTextNode(content.slice(lastIndex)));
+          }
+          
+          node.parentNode?.replaceChild(fragment, node);
+        } else {
+          // Recursively process child nodes
+          Array.from(node.childNodes).forEach(processNode);
+        }
       };
 
-      // Apply deduplication for both inline and display math
-      processed = deduplicateExpressions(processed, '$');
-      processed = deduplicateExpressions(processed, '$$');
-      
-      // Remove any zero-width spaces and other invisible characters that might cause duplication
-      processed = processed.replace(/[\u200B-\u200D\uFEFF]/g, '');
-      
-      // Convert to HTML elements for rendering
-      processed = processed.replace(/\$\$(.*?)\$\$/g, '<div class="math-display">$1</div>');
-      processed = processed.replace(/\$([^$]*?)\$/g, '<span class="math-inline">$1</span>');
-      
-      // Parse markdown with proper handling of math blocks
-      return marked.parse(processed, {
-        gfm: true,
-        breaks: true,
-        headerIds: true
-      });
+      processNode(tempDiv);
+      return tempDiv.innerHTML;
     } catch (error) {
       console.error('Error processing content:', error);
       return text;
