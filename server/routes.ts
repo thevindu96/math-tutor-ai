@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { getMathResponse } from "../client/src/lib/openai";
+import { getMathResponse } from "../client/src/lib/ai";
 
 export function registerRoutes(app: Express) {
   app.post("/api/chat", async (req, res) => {
